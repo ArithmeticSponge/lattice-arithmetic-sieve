@@ -4,6 +4,32 @@ This repository contains the computational framework, mathematical formalization
 
 **Full Research Paper available on Zenodo:** [DOI: 10.5281/zenodo.23501777](https://doi.org)
 
+---
+
+<details>
+<summary>📖 <b>The Story Behind the Intuition (Click to expand)</b></summary>
+<br>
+
+> *"This project, which began more than fifty years ago, now awaits a true mathematician with the heart of a curious thirteen-year-old..."*
+
+This is the story of an intuition that dates back to my school days. To be precise, middle school. I was thirteen or fourteen years old, and that day the geometry lesson was about Euclid’s postulates. For a curious kid, settling for the mere definition of an axiom was not enough. I wanted to "experiment" and feel with my own hands that through two distinct points passes one and only one line. More importantly, I wanted to "see passing", from a single point, infinite lines. 
+
+And so, with my grid-lined notebook, I began to draw a central point. I considered that point as the primary and infinite source of light rays radiating in all directions of three-dimensional space. But having only a sheet of paper at my disposal, I limited myself to the two dimensions of two-dimensional space. I then drew eight points around the central source: above, below, at the sides, and at the beginning of the diagonals. Now, between the central point and each of the eight points around the center, one and only one line could pass. Therefore, on those eight lines, beyond the eight points, only empty spaces remained, meaning that the corresponding line started exactly from the plotted point. Then I moved to the eight adjacent rows. There, in every direction, only points arose to infinity. Every point was the beginning of a new line. With the help of the squares on my notebook, I left empty the space that belonged to the line in question. I used space as if it were the field of a great game of Battleship. Then I moved to the next rows and started again, and so on. 
+
+In the end, I had carpeted the space with points, and every point joined to the central point traced one and only one line, leaving empty space where the continuation of the line already traced lay. Every point in the space thus drawn was one of the infinite possible lines to trace around the central point. After completely carpeting a sheet with points and voids, I contemplated that spectacle. And I dreamed with my eyes open, imagining rotating it in all dimensions of three-dimensional space...
+
+Years later, I realized that if I inverted the points with the voids and vice versa, I would obtain the drawing "in negative" in a much faster and automatic way. What I obtained then, as I immediately understood, was the graphical representation of integers starting from their prime factorization. I hadn't discovered anything, of course, but I had created an infallible graphical scheme—simple to build, without calculations or artifices, and beautiful to look at. 
+
+Then, somewhat suddenly, Artificial Intelligence appeared in our homes. I remembered the ancient project of points and voids. The time had come to resume the work and feed it to my Mac mini and the AI. In just a few days, in this October of 2026, thanks to a close collaboration with Artificial Intelligence, the formalization of the work and the codes in Python and Wolfram languages came to light. 
+
+Now this project awaits a true mathematician with the heart of a curious thirteen-year-old, who knows how to investigate fractal structures, recurrences, and symmetries of an elegant and somewhat artistic geometric scheme—and who, perhaps, will know how to find the answers to the dreams of a curious boy from many years ago who dreamed at his school desk.
+
+---
+</details>
+
+---
+
+
 ## Overview
 
 The model maps the binary state of coprimality $E(x,y)$ on a discrete Cartesian plane based on $\gcd(|x|,|y|) > 1$. By analyzing the density of blocked lattice nodes, a striking architectural duality emerges between arithmetic opposites:
