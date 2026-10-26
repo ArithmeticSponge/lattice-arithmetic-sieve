@@ -4,21 +4,12 @@ LatticePointIndicator[x_, y_] := If[
    If[x == 0, Abs[y] > 1, If[y == 0, Abs[x] > 1, GCD[Abs[x], Abs[y]] > 1]]
 ];
 
-VisualizzaPrimiENAC[limiteX_] := Module[{conteggioDivisori, record, primi, nac, griglia, lineePrimi, lineeNac, lineeTotali},
+VisualizzaPrimiENAC[limiteX_] := Module[{conteggioDivisori, record, primi, nac, griglia, lineePrimi, lineeNac, lineeTotali, rec},
   conteggioDivisori = Table[Length[Divisors[x]], {x, 1, limiteX}];
   primi = Select[Range[limiteX], conteggioDivisori[[#]] == 2 &];
   
-  record = 0;
-  nac = Reap[
-    Do[
-      If[conteggioDivisori[[x]] > record, 
-        record = conteggioDivisori[[x]]; 
-        Sow[x]
-      ], 
-      {x, 1, limiteX}
-    ]
-  ][];
-  nac = If[nac == {}, {}, nac[]];
+  rec = 0;
+  nac = Select[Range[limiteX], If[conteggioDivisori[[#]] > rec, rec = conteggioDivisori[[#]]; True, False] &];
   
   griglia = Table[
     If[LatticePointIndicator[x, y], 1, 0], 
