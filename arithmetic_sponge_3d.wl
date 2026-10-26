@@ -5,16 +5,15 @@ LatticePointIndicator3D[i_, j_, k_] := If[
 ];
 
 GeneraSpugna3D[dim_] := Module[{punti},
-  punti = Reap[
-    Do[
-      If[LatticePointIndicator3D[i, j, k], Sow[{i, j, k}]],
+  punti = Flatten[
+    Table[
+      If[LatticePointIndicator3D[i, j, k], {i, j, k}, Nothing], 
       {i, -dim, dim}, {j, -dim, dim}, {k, -dim, dim}
-    ]
-  ][];
+    ], 
+    2
+  ];
   
-  If[punti == {}, punti = {{}}];
-  
-  Graphics3D[{PointSize[0.015], Black, Point[punti[]]}, 
+  Graphics3D[{PointSize[0.015], Black, Point[punti]}, 
    Boxed -> True, 
    Axes -> True, 
    AxesLabel -> {"Asse X", "Asse Y", "Asse Z"}, 
