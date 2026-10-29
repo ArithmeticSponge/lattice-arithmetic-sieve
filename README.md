@@ -66,3 +66,4 @@ This project provides native implementations in both **Python** (using Tkinter a
 *   `sponge_3d.py` / `arithmetic_sponge_3d.wl`: Volumetric voxel rendering of the 3D Arithmetic Sponge.
 
 The underlying algorithms allow for mass parallelization (`ParallelTable` in Wolfram), as every column cross-section calculation is completely independent of the others.
+*   `goldbach_sieve.py`: Interactive 2D visualization tracking Euclid's lines and dynamic projection of Goldbach's pairs with real-time analytics.
