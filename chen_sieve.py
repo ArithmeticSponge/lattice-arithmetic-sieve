@@ -1,23 +1,27 @@
-mport math
+import math
 import tkinter as tk
 from tkinter import messagebox
 
 class SetaccioChenInterattivo:
     def __init__(self, root):
         self.root = root
-        self.root.title("Lattice Arithmetic Sieve - Visualizzazione del Teorema di Chen")
-        self.zoom = 25
-        self.pan_x = 50
-        self.pan_y = 650
+        self.root.title("Lattice Arithmetic Sieve - Visualizzazione del Teorema di Chen (Auto-Centrante)")
         
-        self.limite_calcolo = 5000
+        # Partiamo con un limite iniziale flessibile
+        self.limite_calcolo = 6000
         self.primi = self.calcola_primi(self.limite_calcolo)
         self.semiprimi = self.calcola_semiprimi(self.limite_calcolo)
         
-        self.numero_pari = 22
-        self.soluzioni_goldbach = [] # Primo + Primo
-        self.soluzioni_chen = []     # Primo + Semiprimo (o viceversa)
+        self.numero_pari = 5500  # Impostato subito a 5500 per testare il tuo esempio!
+        self.soluzioni_goldbach = []
+        self.soluzioni_chen = []
 
+        # Parametri di visualizzazione provvisori (verranno riscritti dall'autocentramento)
+        self.zoom = 2
+        self.pan_x = 50
+        self.pan_y = 750
+
+        # Layout a due pannelli
         self.pannello_controllo = tk.Frame(root, width=280, bg="#f4f4f6", bd=1, relief=tk.SUNKEN)
         self.pannello_controllo.pack(side=tk.LEFT, fill=tk.Y)
         
@@ -30,8 +34,9 @@ class SetaccioChenInterattivo:
         self.canvas.bind("<B1-Motion>", self.scroll_move)
         self.canvas.bind("<MouseWheel>", self.zoom_wheel)
 
-        self.aggiorna_combinazioni_chen()
-        self.disegna_struttura()
+        # Forza il calcolo e l'autocentramento iniziale all'apertura
+        self.root.update()
+        self.cambia_numero_pari()
 
     def calcola_primi(self, n):
         setaccio = [True] * (n + 1)
@@ -70,12 +75,35 @@ class SetaccioChenInterattivo:
         self.lista_testo = tk.Text(self.pannello_controllo, font=("Courier", 9, "bold"), bg="white", fg="black", height=22, width=32)
         self.lista_testo.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
 
+    def auto_centra_vista(self):
+        w = self.canvas.winfo_width()
+        h = self.canvas.winfo_height()
+        if w <= 1: w, h = 850, 800
+
+        spazio_w = w - 120
+        spazio_h = h - 120
+
+        self.zoom = min(spazio_w / self.numero_pari, spazio_h / self.numero_pari)
+        
+        if self.zoom > 30: self.zoom = 30
+        if self.zoom < 0.001: self.zoom = 0.001
+
+        self.pan_x = 60
+        self.pan_y = h - 60
+
     def cambia_numero_pari(self):
         try:
             valore = int(self.entry_numero.get())
             if valore < 4 or valore % 2 != 0: raise ValueError
             self.numero_pari = valore
+            
+            if self.numero_pari > self.limite_calcolo:
+                self.limite_calcolo = self.numero_pari + 500
+                self.primi = self.calcola_primi(self.limite_calcolo)
+                self.semiprimi = self.calcola_semiprimi(self.limite_calcolo)
+                
             self.aggiorna_combinazioni_chen()
+            self.auto_centra_vista()
             self.disegna_struttura()
         except ValueError:
             messagebox.showerror("Errore", "Inserisci un numero intero pari >= 4.")
@@ -118,59 +146,56 @@ class SetaccioChenInterattivo:
         min_y = int((self.pan_y - h) / self.zoom) - 1
         max_y = int(self.pan_y / self.zoom) + 1
 
-        # 1. Disegna le Lame di Luce (Primi - Verde Soffuso)
+        spessore_linea = max(1, int(self.zoom * 0.8))
         for p in self.primi:
+            if p > self.numero_pari: break
             if min_x <= p <= max_x:
                 sx = p * self.zoom + self.pan_x
-                self.canvas.create_line(sx, 0, sx, h, fill="#e8f5e9", width=self.zoom * 0.8)
+                self.canvas.create_line(sx, 0, sx, h, fill="#e8f5e9", width=spessore_linea)
             if min_y <= p <= max_y:
                 sy = self.pan_y - p * self.zoom
-                self.canvas.create_line(0, sy, w, sy, fill="#e8f5e9", width=self.zoom * 0.8)
+                self.canvas.create_line(0, sy, w, sy, fill="#e8f5e9", width=spessore_linea)
 
-        # 2. Disegna le Lame di Penombra (Semiprimi - Grigio/Azzurro Soffuso)
         for sp in self.semiprimi:
+            if sp > self.numero_pari: break
             if min_x <= sp <= max_x:
                 sx = sp * self.zoom + self.pan_x
-                self.canvas.create_line(sx, 0, sx, h, fill="#e1f5fe", width=self.zoom * 0.8)
+                self.canvas.create_line(sx, 0, sx, h, fill="#e1f5fe", width=spessore_linea)
             if min_y <= sp <= max_y:
                 sy = self.pan_y - sp * self.zoom
-                self.canvas.create_line(0, sy, w, sy, fill="#e1f5fe", width=self.zoom * 0.8)
+                self.canvas.create_line(0, sy, w, sy, fill="#e1f5fe", width=spessore_linea)
 
-        # 3. Griglia e Assi di Sfondo
-        for gx in range(max(0, min_x), max_x):
-            sx = gx * self.zoom + self.pan_x
-            self.canvas.create_line(sx, 0, sx, h, fill="#f5f5f5")
-        for gy in range(max(0, min_y), max_y):
-            sy = self.pan_y - gy * self.zoom
-            self.canvas.create_line(0, sy, w, sy, fill="#f5f5f5")
+        if self.zoom > 3:
+            for gx in range(max(0, min_x), min(self.numero_pari, max_x)):
+                sx = gx * self.zoom + self.pan_x
+                self.canvas.create_line(sx, 0, sx, h, fill="#f5f5f5")
+            for gy in range(max(0, min_y), min(self.numero_pari, max_y)):
+                sy = self.pan_y - gy * self.zoom
+                self.canvas.create_line(0, sy, w, sy, fill="#f5f5f5")
 
         self.canvas.create_line(self.pan_x, 0, self.pan_x, h, fill="#888888", width=2)
         self.canvas.create_line(0, self.pan_y, w, self.pan_y, fill="#888888", width=2)
 
-        # 4. Diagonale del Numero Pari N
         x_inizio, y_inizio = 0 * self.zoom + self.pan_x, self.pan_y - self.numero_pari * self.zoom
         x_fine, y_fine = self.numero_pari * self.zoom + self.pan_x, self.pan_y - 0 * self.zoom
         self.canvas.create_line(x_inizio, y_inizio, x_fine, y_fine, fill="#9c27b0", width=3, dash=(4, 2))
 
-        # 5. Nodi del reticolo
-        r_punto = max(2, self.zoom // 8)
-        for gx in range(max(0, min_x), max_x):
-            for gy in range(max(0, min_y), max_y):
-                if self.deve_avere_punto(gx, gy):
-                    cx, cy = gx * self.zoom + self.pan_x, self.pan_y - gy * self.zoom
-                    self.canvas.create_oval(cx - r_punto, cy - r_punto, cx + r_punto, cy + r_punto, fill="#cfd8dc", outline="")
+        if self.zoom > 5:
+            r_punto = max(2, self.zoom // 8)
+            for gx in range(max(0, min_x), min(self.numero_pari, max_x)):
+                for gy in range(max(0, min_y), min(self.numero_pari, max_y)):
+                    if self.deve_avere_punto(gx, gy):
+                        cx, cy = gx * self.zoom + self.pan_x, self.pan_y - gy * self.zoom
+                        self.canvas.create_oval(cx - r_punto, cy - r_punto, cx + r_punto, cy + r_punto, fill="#cfd8dc", outline="")
 
-        # 6. Accensione Intersezioni Goldbach (Arancione)
+        r_g = max(4, int(self.zoom * 0.4)) if self.zoom > 2 else 4
         for s in self.soluzioni_goldbach:
             cx, cy = s[0] * self.zoom + self.pan_x, self.pan_y - s[1] * self.zoom
-            r_g = max(5, self.zoom // 4)
-            self.canvas.create_oval(cx - r_g, cy - r_g, cx + r_g, cy + r_g, outline="#ff5722", width=3, fill="#ffebe6")
+            self.canvas.create_oval(cx - r_g, cy - r_g, cx + r_g, cy + r_g, outline="#ff5722", width=2, fill="#ffebe6")
 
-        # 7. Accensione Intersezioni Chen (Blu/Azzurro)
         for s in self.soluzioni_chen:
             cx, cy = s[0] * self.zoom + self.pan_x, self.pan_y - s[1] * self.zoom
-            r_c = max(5, self.zoom // 4)
-            self.canvas.create_oval(cx - r_c, cy - r_c, cx + r_c, cy + r_c, outline="#00bcd4", width=3, fill="#e0f7fa")
+            self.canvas.create_oval(cx - r_g, cy - r_g, cx + r_g, cy + r_g, outline="#00bcd4", width=2, fill="#e0f7fa")
 
     def scroll_start(self, event): self.last_x, self.last_y = event.x, event.y
     def scroll_move(self, event):
@@ -181,7 +206,7 @@ class SetaccioChenInterattivo:
     def zoom_wheel(self, event):
         fattore = 1.1 if event.delta > 0 else 0.9
         nuovo_zoom = self.zoom * fattore
-        if 5 <= nuovo_zoom <= 150:
+        if 0.0001 <= nuovo_zoom <= 200:
             self.pan_x = event.x - (event.x - self.pan_x) * (nuovo_zoom / self.zoom)
             self.pan_y = event.y - (event.y - self.pan_y) * (nuovo_zoom / self.zoom)
             self.zoom = nuovo_zoom
