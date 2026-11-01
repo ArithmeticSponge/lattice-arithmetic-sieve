@@ -70,6 +70,7 @@ This project provides native implementations in both **Python** (using Tkinter a
 *   `infinite_navigation.py` / `infinite_navigation.wl`: High-performance computing grids displaying the color-coded Primes and HCN pillars.
 *   `sponge_3d.py` / `arithmetic_sponge_3d.wl`: Volumetric voxel rendering of the 3D Arithmetic Sponge.
 *   `chen_sieve.py`: Interactive 2D visualization mapping Chen's Theorem by cross-sections of prime and semiprime coordinate bands.
+*   `chen_numerical.py`: Pure numerical analyzer for ultra-high integers, bypassing graphical rendering constraints to output zero-latency raw data and text reports.
 
 
 The underlying algorithms allow for mass parallelization (`ParallelTable` in Wolfram), as every column cross-section calculation is completely independent of the others.
