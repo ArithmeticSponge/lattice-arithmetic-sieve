@@ -5,24 +5,21 @@ from tkinter import messagebox
 class SetaccioChenInterattivo:
     def __init__(self, root):
         self.root = root
-        self.root.title("Lattice Arithmetic Sieve - Visualizzazione del Teorema di Chen (Auto-Centrante)")
+        self.root.title("Lattice Arithmetic Sieve - Teorema di Chen & Statistiche")
         
-        # Partiamo con un limite iniziale flessibile
         self.limite_calcolo = 6000
         self.primi = self.calcola_primi(self.limite_calcolo)
         self.semiprimi = self.calcola_semiprimi(self.limite_calcolo)
         
-        self.numero_pari = 5500  # Impostato subito a 5500 per testare il tuo esempio!
+        self.numero_pari = 5500  
         self.soluzioni_goldbach = []
         self.soluzioni_chen = []
 
-        # Parametri di visualizzazione provvisori (verranno riscritti dall'autocentramento)
         self.zoom = 2
         self.pan_x = 50
         self.pan_y = 750
 
-        # Layout a due pannelli
-        self.pannello_controllo = tk.Frame(root, width=280, bg="#f4f4f6", bd=1, relief=tk.SUNKEN)
+        self.pannello_controllo = tk.Frame(root, width=300, bg="#f4f4f6", bd=1, relief=tk.SUNKEN)
         self.pannello_controllo.pack(side=tk.LEFT, fill=tk.Y)
         
         self.canvas = tk.Canvas(root, bg="white")
@@ -34,7 +31,6 @@ class SetaccioChenInterattivo:
         self.canvas.bind("<B1-Motion>", self.scroll_move)
         self.canvas.bind("<MouseWheel>", self.zoom_wheel)
 
-        # Forza il calcolo e l'autocentramento iniziale all'apertura
         self.root.update()
         self.cambia_numero_pari()
 
@@ -69,25 +65,29 @@ class SetaccioChenInterattivo:
         btn_calcola = tk.Button(self.pannello_controllo, text="Visualizza Teorema Chen", command=self.cambia_numero_pari, font=("Arial", 10, "bold"), bg="#2196F3", fg="black")
         btn_calcola.pack(pady=10, padx=10, fill=tk.X)
 
-        lbl_res = tk.Label(self.pannello_controllo, text="Scomposizioni Rilevate:", font=("Arial", 11, "bold"), bg="#f4f4f6", fg="black")
+        lbl_res = tk.Label(self.pannello_controllo, text="Scomposizioni & Report:", font=("Arial", 11, "bold"), bg="#f4f4f6", fg="black")
         lbl_res.pack(pady=(20, 5), padx=10, anchor="w")
 
-        self.lista_testo = tk.Text(self.pannello_controllo, font=("Courier", 9, "bold"), bg="white", fg="black", height=22, width=32)
-        self.lista_testo.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
+        frame_testo = tk.Frame(self.pannello_controllo)
+        frame_testo.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
+
+        scrollbar = tk.Scrollbar(frame_testo)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.lista_testo = tk.Text(frame_testo, font=("Courier", 9, "bold"), bg="white", fg="black", height=22, width=30, yscrollcommand=scrollbar.set)
+        self.lista_testo.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        scrollbar.config(command=self.lista_testo.yview)
 
     def auto_centra_vista(self):
         w = self.canvas.winfo_width()
         h = self.canvas.winfo_height()
         if w <= 1: w, h = 850, 800
-
         spazio_w = w - 120
         spazio_h = h - 120
-
         self.zoom = min(spazio_w / self.numero_pari, spazio_h / self.numero_pari)
-        
         if self.zoom > 30: self.zoom = 30
         if self.zoom < 0.001: self.zoom = 0.001
-
         self.pan_x = 60
         self.pan_y = h - 60
 
@@ -115,12 +115,22 @@ class SetaccioChenInterattivo:
         for x in range(2, self.numero_pari):
             y = self.numero_pari - x
             if x in self.primi and y in self.primi:
-                self.soluzioni_goldbach.append((x, y))
+                if x <= y:
+                    self.soluzioni_goldbach.append((x, y))
             elif (x in self.primi and y in self.semiprimi) or (x in self.semiprimi and y in self.primi):
-                self.soluzioni_chen.append((x, y))
+                if x <= y:
+                    self.soluzioni_chen.append((x, y))
+
+        tot_goldbach = len(self.soluzioni_goldbach)
+        tot_chen = len(self.soluzioni_chen)
 
         self.lista_testo.delete("1.0", tk.END)
-        self.lista_testo.insert(tk.END, f"Per N = {self.numero_pari}:\n\n")
+        self.lista_testo.insert(tk.END, f"📌 NUMERO PARI N = {self.numero_pari}\n")
+        self.lista_testo.insert(tk.END, f"📊 REPORT STATISTICO:\n")
+        self.lista_testo.insert(tk.END, f"• Coppie Goldbach: {tot_goldbach}\n")
+        self.lista_testo.insert(tk.END, f"• Coppie Chen:     {tot_chen}\n")
+        self.lista_testo.insert(tk.END, "======================\n\n")
+        
         self.lista_testo.insert(tk.END, "--- PRIMO + PRIMO ---\n")
         for s in self.soluzioni_goldbach:
             self.lista_testo.insert(tk.END, f" {self.numero_pari} = {s[0]} + {s[1]}\n")
