@@ -27,6 +27,8 @@ def calcola_semiprimi(n, primi):
 def analizza_intervallo(start, end, step_type, step_val):
     print("\n[1/3] Generazione database dei numeri primi...")
     primi = calcola_primi(end)
+    lista_primi_ordinata = sorted(list(primi))
+    
     print("[2/3] Generazione database dei semiprimi...")
     semiprimi = calcola_semiprimi(end, primi)
     
@@ -34,19 +36,27 @@ def analizza_intervallo(start, end, step_type, step_val):
     conteggi_goldbach = []
     conteggi_chen = []
     
-    print("[3/3] Scansione dell'intervallo selezionato...")
+    print("[3/3] Scansione turbo dell'intervallo selezionato...")
     corrente = start
     while corrente <= end:
         if corrente % 2 == 0 and corrente >= 4:
             goldbach_count = 0
             chen_count = 0
-            for x in range(2, corrente):
+            
+            # SCANSIONE VETTORIALE ULTRA-VELOCE: cicla solo sui primi reali
+            for x in lista_primi_ordinata:
+                if x > corrente // 2: break
+                y = corrente - x
+                if y in primi:
+                    goldbach_count += 1
+            
+            for x in lista_primi_ordinata:
+                if x >= corrente: break
                 y = corrente - x
                 if x <= y:
-                    if x in primi and y in primi:
-                        goldbach_count += 1
-                    elif (x in primi and y in semiprimi) or (x in semiprimi and y in primi):
-                        chen_count += 1
+                    if y in semiprimi: chen_count += 1
+                else:
+                    if y in semiprimi: chen_count += 1
             
             valori_N.append(corrente)
             conteggi_goldbach.append(goldbach_count)
@@ -62,8 +72,8 @@ def analizza_intervallo(start, end, step_type, step_val):
 
 def genera_grafico(valori_N, conteggi_goldbach, conteggi_chen):
     plt.figure(figsize=(8, 4.5))
-    plt.scatter(valori_N, conteggi_goldbach, color="#ff5722", label="Goldbach (Primo+Primo)", s=15, alpha=0.7)
-    plt.scatter(valori_N, conteggi_chen, color="#00bcd4", label="Chen (Primo+Semiprimo)", s=15, alpha=0.7)
+    plt.scatter(valori_N, conteggi_goldbach, color="#ff5722", label="Goldbach (Primo+Primo)", s=1, alpha=0.5)
+    plt.scatter(valori_N, conteggi_chen, color="#00bcd4", label="Chen (Primo+Semiprimo)", s=1, alpha=0.5)
     plt.title("Andamento della Densità di Soluzioni - Goldbach vs Chen")
     plt.xlabel("Numero Pari (N)")
     plt.ylabel("Numero di Coppie Uniche")
@@ -107,7 +117,7 @@ def genera_pdf_report(start, end, valori_N, conteggi_goldbach, conteggi_chen, pa
         rapporto = f"{(c/g):.2f}x" if g > 0 else "N/D"
         dati_tabella.append([str(n), str(g), str(c), rapporto])
         
-    t = Table(dati_tabella, colWidths=[120, 120, 120, 120])
+    t = Table(dati_tabella, colWidths=[100, 110, 110, 120])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1a237e')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
@@ -126,11 +136,11 @@ def genera_pdf_report(start, end, valori_N, conteggi_goldbach, conteggi_chen, pa
 
 def main():
     print("="*60)
-    print("      LATTICE SIEVE - MOTORE DI SCANSIONE STATISTICA")
+    print("      LATTICE SIEVE - MOTORE DI SCANSIONE STATISTICA (TURBO)")
     print("="*60)
     try:
-        start = int(input("Inserisci l'inizio del range (es. 100): "))
-        end = int(input("Inserisci la fine del range (es. 1000): "))
+        start = int(input("Inserisci l'inizio del range (es. 6): "))
+        end = int(input("Inserisci la fine del range (es. 50000): "))
         if start > end or start < 4: raise ValueError
     except ValueError:
         print("Errore nei valori numerici inseriti.")
@@ -144,7 +154,7 @@ def main():
     step_val = 2
     if scelta == "2":
         try:
-            step_val = int(input("Inserisci il passo del multiplo (es. 10 per fare 10, 20, 30...): "))
+            step_val = int(input("Inserisci il passo del multiplo (es. 10): "))
             if step_val <= 0: raise ValueError
         except ValueError:
             print("Passo non valido.")
@@ -153,7 +163,7 @@ def main():
     valori_N, conteggi_goldbach, conteggi_chen = analizza_intervallo(start, end, scelta, step_val)
     
     if not valori_N:
-        print("Nessun numero pari trovato nell'intervallo selezionato.")
+        print("Nessun numero pari trovato.")
         return
         
     print("\nGenerazione del grafico statistico...")
@@ -170,3 +180,4 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+
